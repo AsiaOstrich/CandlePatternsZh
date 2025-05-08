@@ -1,0 +1,514 @@
+//@version=6
+// GitHub: https://github.com/AsiaOstrich/CandlePatternsZh
+indicator("Candlestick Patterns Zh", shorttitle = "K線形態", overlay=true)
+
+C_DownTrend = true
+C_UpTrend = true
+var trendRule1 = "SMA50"
+var trendRule2 = "SMA50, SMA200"
+var trendRule = input.string(trendRule1, "趨勢判斷依據", options=[trendRule1, trendRule2, "不判斷"])
+
+if trendRule == trendRule1
+	priceAvg = ta.sma(close, 50)
+	C_DownTrend := close < priceAvg
+	C_UpTrend := close > priceAvg
+
+if trendRule == trendRule2
+	sma200 = ta.sma(close, 200)
+	sma50 = ta.sma(close, 50)
+	C_DownTrend := close < sma50 and sma50 < sma200
+	C_UpTrend := close > sma50 and sma50 > sma200
+C_Len = 14 // ta.ema depth for bodyAvg
+C_ShadowPercent = 5.0 // size of shadows
+C_ShadowEqualsPercent = 100.0
+C_DojiBodyPercent = 5.0
+C_Factor = 2.0 // shows the number of times the shadow dominates the candlestick body
+
+C_BodyHi = math.max(close, open)
+C_BodyLo = math.min(close, open)
+C_Body = C_BodyHi - C_BodyLo
+C_BodyAvg = ta.ema(C_Body, C_Len)
+C_SmallBody = C_Body < C_BodyAvg
+C_LongBody = C_Body > C_BodyAvg
+C_UpShadow = high - C_BodyHi
+C_DnShadow = C_BodyLo - low
+C_HasUpShadow = C_UpShadow > C_ShadowPercent / 100 * C_Body
+C_HasDnShadow = C_DnShadow > C_ShadowPercent / 100 * C_Body
+C_WhiteBody = open < close
+C_BlackBody = open > close
+C_Range = high-low
+C_IsInsideBar = C_BodyHi[1] > C_BodyHi and C_BodyLo[1] < C_BodyLo
+C_BodyMiddle = C_Body / 2 + C_BodyLo
+C_ShadowEquals = C_UpShadow == C_DnShadow or (math.abs(C_UpShadow - C_DnShadow) / C_DnShadow * 100) < C_ShadowEqualsPercent and (math.abs(C_DnShadow - C_UpShadow) / C_UpShadow * 100) < C_ShadowEqualsPercent
+C_IsDojiBody = C_Range > 0 and C_Body <= C_Range * C_DojiBodyPercent / 100
+C_Doji = C_IsDojiBody and C_ShadowEquals
+
+patternLabelPosLow = low - (ta.atr(30) * 0.6)
+patternLabelPosHigh = high + (ta.atr(30) * 0.6)
+label_color_bullish = input(color.blue, "看漲標籤顏色")
+label_color_bearish = input(color.red, "看跌標籤顏色")
+label_color_neutral = input(color.gray, "中性標籤顏色")
+CandleType = input.string(title = "形態類型", defval="Both", options=["Bullish", "Bearish", "Both"])
+
+AbandonedBabyInput = input(title = "棄嬰形態" ,defval=true) 
+
+DarkCloudCoverInput = input(title = "烏雲蓋頂" ,defval=false) 
+
+DojiInput = input(title = "十字星" ,defval=true) 
+
+DojiStarInput = input(title = "十字星形態" ,defval=false) 
+
+DownsideTasukiGapInput = input(title = "下跌跳空並列" ,defval=false) 
+
+DragonflyDojiInput = input(title = "蜻蜓十字" ,defval=true) 
+
+EngulfingInput = input(title = "吞沒形態" ,defval=true) 
+
+EveningDojiStarInput = input(title = "黃昏十字星" ,defval=false) 
+
+EveningStarInput = input(title = "黃昏之星" ,defval=false) 
+
+FallingThreeMethodsInput = input(title = "下降三法" ,defval=false) 
+
+FallingWindowInput = input(title = "下跌窗口" ,defval=false) 
+
+GravestoneDojiInput = input(title = "墓碑十字" ,defval=false) 
+
+HammerInput = input(title = "錘子線" ,defval=true) 
+
+HangingManInput = input(title = "上吊線" ,defval=false) 
+
+HaramiCrossInput = input(title = "十字孕線" ,defval=false) 
+
+HaramiInput = input(title = "孕線形態" ,defval=false) 
+
+InvertedHammerInput = input(title = "倒錘子線" ,defval=false) 
+
+KickingInput = input(title = "反轉形態" ,defval=false) 
+
+LongLowerShadowInput = input(title = "長下影線" ,defval=false) 
+
+LongUpperShadowInput = input(title = "長上影線" ,defval=false) 
+
+MarubozuBlackInput = input(title = "黑色光頭光腳" ,defval=false) 
+
+MarubozuWhiteInput = input(title = "白色光頭光腳" ,defval=false) 
+
+MorningDojiStarInput = input(title = "早晨十字星" ,defval=false) 
+
+MorningStarInput = input(title = "早晨之星" ,defval=false) 
+
+OnNeckInput = input(title = "頸線形態" ,defval=false) 
+
+PiercingInput = input(title = "刺透形態" ,defval=false) 
+
+RisingThreeMethodsInput = input(title = "上升三法" ,defval=false) 
+
+RisingWindowInput = input(title = "上升窗口" ,defval=false) 
+
+ShootingStarInput = input(title = "流星線" ,defval=false) 
+
+SpinningTopBlackInput = input(title = "黑色陀螺" ,defval=false) 
+
+SpinningTopWhiteInput = input(title = "白色陀螺" ,defval=false) 
+
+ThreeBlackCrowsInput = input(title = "三隻烏鴉" ,defval=false) 
+
+ThreeWhiteSoldiersInput = input(title = "三白兵" ,defval=false) 
+
+TriStarInput = input(title = "三星形態" ,defval=false) 
+
+TweezerBottomInput = input(title = "底部鑷子" ,defval=false) 
+
+TweezerTopInput = input(title = "頂部鑷子" ,defval=false) 
+
+UpsideTasukiGapInput = input(title = "上漲跳空並列" ,defval=false) 
+
+C_OnNeckBearishNumberOfCandles = 2
+C_OnNeckBearish = false
+if C_DownTrend and C_BlackBody[1] and C_LongBody[1] and C_WhiteBody and open < close[1] and C_SmallBody and C_Range!=0 and math.abs(close-low[1])<=C_BodyAvg*0.05
+	C_OnNeckBearish := true
+alertcondition(C_OnNeckBearish, title = "頸線形態", message = "New 頸線形態 pattern detected")
+if C_OnNeckBearish  and  OnNeckInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishOnNeck = "頸線形態\n頸線形態是一個在下跌趨勢中出現的兩根K線延續形態。第一根K線是長實體陰線，第二根K線是短實體陽線。第二根K線的收盤價接近或等於第一根K線的最低價。該形態暗示下跌趨勢可能延續，突破陽線最低價有時被視為確認信號。"
+    label.new(bar_index, patternLabelPosHigh, text="頸線", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishOnNeck)
+C_RisingWindowBullishNumberOfCandles = 2
+C_RisingWindowBullish = false
+if C_UpTrend[1] and (C_Range!=0 and C_Range[1]!=0) and low > high[1]
+	C_RisingWindowBullish := true
+alertcondition(C_RisingWindowBullish, title = "上升窗口", message = "New 上升窗口 pattern detected")
+if C_RisingWindowBullish  and  RisingWindowInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishRisingWindow = "上升窗口\n上升窗口是一個在上升趨勢中形成的兩根K線看漲延續形態。該形態中的兩根K線可以是任何類型（除了四價十字星）。該形態最重要的特徵是第一根K線的最高價和第二根K線的最低價之間存在價格缺口。這個缺口（窗口）表示對賣壓的支撐。"
+    label.new(bar_index, patternLabelPosLow, text="上升窗", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishRisingWindow)
+C_FallingWindowBearishNumberOfCandles = 2
+C_FallingWindowBearish = false
+if C_DownTrend[1] and (C_Range!=0 and C_Range[1]!=0) and high < low[1]
+	C_FallingWindowBearish := true
+alertcondition(C_FallingWindowBearish, title = "下跌窗口", message = "New 下跌窗口 pattern detected")
+if C_FallingWindowBearish  and  FallingWindowInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishFallingWindow = "下跌窗口\n下跌窗口是一個在下跌趨勢中形成的兩根K線看跌延續形態。該形態中的兩根K線可以是任何類型（除了四價十字星）。該形態最重要的特徵是第一根K線的最低價和第二根K線的最高價之間存在價格缺口。這個缺口（窗口）的存在意味著下跌趨勢可能延續。"
+    label.new(bar_index, patternLabelPosHigh, text="下跌窗", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishFallingWindow)
+C_FallingThreeMethodsBearishNumberOfCandles = 5
+C_FallingThreeMethodsBearish = false
+if C_DownTrend[4] and (C_LongBody[4] and C_BlackBody[4]) and (C_SmallBody[3] and C_WhiteBody[3] and open[3]>low[4] and close[3]<high[4]) and (C_SmallBody[2] and C_WhiteBody[2] and open[2]>low[4] and close[2]<high[4]) and (C_SmallBody[1] and C_WhiteBody[1] and open[1]>low[4] and close[1]<high[4]) and (C_LongBody and C_BlackBody and close<close[4])
+	C_FallingThreeMethodsBearish := true
+alertcondition(C_FallingThreeMethodsBearish, title = "下降三法", message = "New 下降三法 pattern detected")
+if C_FallingThreeMethodsBearish  and  FallingThreeMethodsInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishFallingThreeMethods = "下降三法\n下降三法是一個五根K線的看跌形態，表示現有下跌趨勢的延續。第一根K線是長實體陰線，接著是三根短實體陽線，它們的實體都在第一根K線的範圍內。最後一根K線也是長實體陰線，收盤價低於第一根K線的收盤價。這根決定性的第五根強烈看跌K線暗示多頭無法逆轉之前的下跌趨勢，空頭重新控制了市場。"
+    label.new(bar_index, patternLabelPosHigh, text="下降三法", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishFallingThreeMethods)
+C_RisingThreeMethodsBullishNumberOfCandles = 5
+C_RisingThreeMethodsBullish = false
+if C_UpTrend[4] and (C_LongBody[4] and C_WhiteBody[4]) and (C_SmallBody[3] and C_BlackBody[3] and open[3]<high[4] and close[3]>low[4]) and (C_SmallBody[2] and C_BlackBody[2] and open[2]<high[4] and close[2]>low[4]) and (C_SmallBody[1] and C_BlackBody[1] and open[1]<high[4] and close[1]>low[4]) and (C_LongBody and C_WhiteBody and close>close[4])
+	C_RisingThreeMethodsBullish := true
+alertcondition(C_RisingThreeMethodsBullish, title = "上升三法", message = "New 上升三法 pattern detected")
+if C_RisingThreeMethodsBullish  and  RisingThreeMethodsInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishRisingThreeMethods = "上升三法\n上升三法是一個五根K線的看漲形態，表示現有上升趨勢的延續。第一根K線是長實體陽線，接著是三根短實體陰線，它們的實體都在第一根K線的範圍內。最後一根K線也是長實體陽線，收盤價高於第一根K線的收盤價。這根決定性的第五根強烈看漲K線暗示空頭無法逆轉之前的上升趨勢，多頭重新控制了市場。"
+    label.new(bar_index, patternLabelPosLow, text="上升三法", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishRisingThreeMethods)
+C_TweezerTopBearishNumberOfCandles = 2
+C_TweezerTopBearish = false
+if C_UpTrend[1] and (not C_IsDojiBody or (C_HasUpShadow and C_HasDnShadow)) and math.abs(high-high[1]) <= C_BodyAvg*0.05 and C_WhiteBody[1] and C_BlackBody and C_LongBody[1]
+	C_TweezerTopBearish := true
+alertcondition(C_TweezerTopBearish, title = "頂部鑷子", message = "New 頂部鑷子 pattern detected")
+if C_TweezerTopBearish  and  TweezerTopInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishTweezerTop = "頂部鑷子\n頂部鑷子是一個兩根K線的形態，表示潛在的看跌反轉。該形態出現在上升趨勢中。第一根K線是長實體陽線，第二根K線是陰線，其最高價幾乎與前一根K線的最高價相同。幾乎相同的高點，加上相反的方向，暗示空頭可能正在接管市場。"
+    label.new(bar_index, patternLabelPosHigh, text="頂部鑷", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishTweezerTop)
+C_TweezerBottomBullishNumberOfCandles = 2
+C_TweezerBottomBullish = false
+if C_DownTrend[1] and (not C_IsDojiBody or (C_HasUpShadow and C_HasDnShadow)) and math.abs(low-low[1]) <= C_BodyAvg*0.05 and C_BlackBody[1] and C_WhiteBody and C_LongBody[1]
+	C_TweezerBottomBullish := true
+alertcondition(C_TweezerBottomBullish, title = "底部鑷子", message = "New 底部鑷子 pattern detected")
+if C_TweezerBottomBullish  and  TweezerBottomInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishTweezerBottom = "底部鑷子\n底部鑷子是一個兩根K線的形態，表示潛在的看漲反轉。該形態出現在下跌趨勢中。第一根K線是長實體陰線，第二根K線是陽線，其最低價幾乎與前一根K線的最低價相同。幾乎相同的低點，加上相反的方向，暗示多頭可能正在接管市場。"
+    label.new(bar_index, patternLabelPosLow, text="底部鑷", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishTweezerBottom)
+C_DarkCloudCoverBearishNumberOfCandles = 2
+C_DarkCloudCoverBearish = false
+if (C_UpTrend[1] and C_WhiteBody[1] and C_LongBody[1]) and (C_BlackBody and open >= high[1] and  close < C_BodyMiddle[1] and close > open[1])
+	C_DarkCloudCoverBearish := true
+alertcondition(C_DarkCloudCoverBearish, title = "烏雲蓋頂", message = "New 烏雲蓋頂 pattern detected")
+if C_DarkCloudCoverBearish  and  DarkCloudCoverInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishDarkCloudCover = "烏雲蓋頂\n烏雲蓋頂是一個在上升趨勢中出現的兩根K線看跌反轉形態。第一根K線是陽線，具有大於平均的實體。第二根K線是陰線，開盤價高於前一根K線的最高價，形成缺口，然後收盤價低於第一根K線的中點。該形態顯示動能可能從上漲轉為下跌，表明可能即將發生反轉。"
+    label.new(bar_index, patternLabelPosHigh, text="烏雲", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishDarkCloudCover)
+C_DownsideTasukiGapBearishNumberOfCandles = 3
+C_DownsideTasukiGapBearish = false
+if C_LongBody[2] and C_SmallBody[1] and C_DownTrend and C_BlackBody[2] and C_BodyHi[1] < C_BodyLo[2] and C_BlackBody[1] and C_WhiteBody and C_BodyHi <= C_BodyLo[2] and C_BodyHi >= C_BodyHi[1]
+	C_DownsideTasukiGapBearish := true
+alertcondition(C_DownsideTasukiGapBearish, title = "下跌跳空並列", message = "New 下跌跳空並列 pattern detected")
+if C_DownsideTasukiGapBearish  and  DownsideTasukiGapInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishDownsideTasukiGap = "下跌跳空並列\n下跌跳空並列是一個在下跌趨勢中出現的三根K線形態，通常暗示下跌趨勢的延續。第一根K線是長實體陰線，接著是一根較小的陰線，其開盤價在前一根K線實體下方形成缺口。第三根K線是陽線，收盤價在前兩根K線形成的缺口內，無法完全填補缺口。多頭無法填補這個缺口暗示下跌趨勢可能延續。"
+    label.new(bar_index, patternLabelPosHigh, text="下跌跳", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishDownsideTasukiGap)
+C_UpsideTasukiGapBullishNumberOfCandles = 3
+C_UpsideTasukiGapBullish = false
+if C_LongBody[2] and C_SmallBody[1] and C_UpTrend and C_WhiteBody[2] and C_BodyLo[1] > C_BodyHi[2] and C_WhiteBody[1] and C_BlackBody and C_BodyLo >= C_BodyHi[2] and C_BodyLo <= C_BodyLo[1]
+	C_UpsideTasukiGapBullish := true
+alertcondition(C_UpsideTasukiGapBullish, title = "上漲跳空並列", message = "New 上漲跳空並列 pattern detected")
+if C_UpsideTasukiGapBullish  and  UpsideTasukiGapInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishUpsideTasukiGap = "上漲跳空並列\n上漲跳空並列是一個在上升趨勢中出現的三根K線形態，通常暗示上升趨勢的延續。第一根K線是長實體陽線，接著是一根較小的陽線，其開盤價在前一根K線實體上方形成缺口。第三根K線是陰線，收盤價在前兩根K線形成的缺口內，無法完全填補缺口。空頭無法填補這個缺口暗示上升趨勢可能延續。"
+    label.new(bar_index, patternLabelPosLow, text="上漲跳", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishUpsideTasukiGap)
+C_EveningDojiStarBearishNumberOfCandles = 3
+C_EveningDojiStarBearish = false
+if C_LongBody[2] and C_IsDojiBody[1] and C_LongBody and C_UpTrend and C_WhiteBody[2] and C_BodyLo[1] > C_BodyHi[2] and C_BlackBody and C_BodyLo <= C_BodyMiddle[2] and C_BodyLo > C_BodyLo[2] and C_BodyLo[1] > C_BodyHi
+	C_EveningDojiStarBearish := true
+alertcondition(C_EveningDojiStarBearish, title = "黃昏十字星", message = "New 黃昏十字星 pattern detected")
+if C_EveningDojiStarBearish  and  EveningDojiStarInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishEveningDojiStar = "黃昏十字星\n這個K線形態是黃昏之星形態的變體。它是一個看跌形態，在上升趨勢中開始於一根長實體陽線。接著出現一個缺口和一根十字星K線，最後以向下收盤結束。收盤價會低於第一天K線的中點。由於存在十字星，它比普通的黃昏之星形態更具看跌意味。"
+    label.new(bar_index, patternLabelPosHigh, text="黃昏十", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishEveningDojiStar)
+C_DojiStarBearishNumberOfCandles = 2
+C_DojiStarBearish = false
+if C_UpTrend and C_WhiteBody[1] and C_LongBody[1] and C_IsDojiBody and C_BodyLo > C_BodyHi[1]
+	C_DojiStarBearish := true
+alertcondition(C_DojiStarBearish, title = "十字星形態", message = "New 十字星形態 pattern detected")
+if C_DojiStarBearish  and  DojiStarInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishDojiStar = "十字星形態\n這是一個在上升趨勢中出現的兩根K線看跌反轉形態。第一根是長實體陽線，接著是一根十字星K線（除了四價十字星），其開盤價高於第一根K線的實體，形成缺口。它被視為反轉信號，並在下一交易日得到確認。"
+    label.new(bar_index, patternLabelPosHigh, text="十字星", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishDojiStar)
+C_DojiStarBullishNumberOfCandles = 2
+C_DojiStarBullish = false
+if C_DownTrend and C_BlackBody[1] and C_LongBody[1] and C_IsDojiBody and C_BodyHi < C_BodyLo[1]
+	C_DojiStarBullish := true
+alertcondition(C_DojiStarBullish, title = "十字星形態", message = "New 十字星形態 pattern detected")
+if C_DojiStarBullish  and  DojiStarInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishDojiStar = "十字星形態\n這是一個在下跌趨勢中出現的兩根K線看漲反轉形態。第一根是長實體陰線，接著是一根十字星K線（除了四價十字星），其開盤價低於第一根K線的實體，形成缺口。它被視為反轉信號，並在下一交易日得到確認。"
+    label.new(bar_index, patternLabelPosLow, text="十字星", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishDojiStar)
+C_MorningDojiStarBullishNumberOfCandles = 3
+C_MorningDojiStarBullish = false
+if C_LongBody[2] and C_IsDojiBody[1] and C_LongBody and C_DownTrend and C_BlackBody[2] and C_BodyHi[1] < C_BodyLo[2] and C_WhiteBody and C_BodyHi >= C_BodyMiddle[2] and C_BodyHi < C_BodyHi[2] and C_BodyHi[1] < C_BodyLo
+	C_MorningDojiStarBullish := true
+alertcondition(C_MorningDojiStarBullish, title = "早晨十字星", message = "New 早晨十字星 pattern detected")
+if C_MorningDojiStarBullish  and  MorningDojiStarInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishMorningDojiStar = "早晨十字星\n這個K線形態是早晨之星形態的變體。這是一個三天的看漲反轉形態，由三根K線組成：第一根是長實體陰線，延續當前的下跌趨勢。接著是一根開盤價向下跳空的十字星。最後是一根長實體陽線，開盤價向上跳空，收盤價高於第一天K線的中點。由於存在十字星，它比普通的早晨之星形態更具看漲意味。"
+    label.new(bar_index, patternLabelPosLow, text="早晨十", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishMorningDojiStar)
+C_PiercingBullishNumberOfCandles = 2
+C_PiercingBullish = false
+if (C_DownTrend[1] and C_BlackBody[1] and C_LongBody[1]) and (C_WhiteBody and open <= low[1] and close > C_BodyMiddle[1] and close < open[1])
+	C_PiercingBullish := true
+alertcondition(C_PiercingBullish, title = "刺透形態", message = "New 刺透形態 pattern detected")
+if C_PiercingBullish  and  PiercingInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishPiercing = "刺透形態\n刺透形態是一個在下跌趨勢中出現的兩根K線看漲反轉形態。第一根K線是陰線，具有大於平均的實體。第二根K線是陽線，開盤價低於前一根K線的最低價，形成缺口，然後收盤價高於第一根K線的中點。該形態顯示動能可能從下跌轉為上漲，表明可能即將發生反轉。"
+    label.new(bar_index, patternLabelPosLow, text="刺透", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishPiercing)
+C_HammerBullishNumberOfCandles = 1
+C_HammerBullish = false
+if C_SmallBody and C_Body > 0 and C_BodyLo > hl2 and C_DnShadow >= C_Factor * C_Body and not C_HasUpShadow
+    if C_DownTrend
+        C_HammerBullish := true
+alertcondition(C_HammerBullish, title = "錘子線", message = "New 錘子線 pattern detected")
+if C_HammerBullish  and  HammerInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishHammer = "錘子線\n當價格在開盤後走低，但隨後反彈收盤於當日低點上方時，會形成錘子線K線。留下的K線看起來像一個方塊連接著一個長條狀的圖形。如果這種K線出現在下跌趨勢中，就被稱為錘子線。"
+    label.new(bar_index, patternLabelPosLow, text="錘子", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishHammer)
+C_HangingManBearishNumberOfCandles = 1
+C_HangingManBearish = false
+if C_SmallBody and C_Body > 0 and C_BodyLo > hl2 and C_DnShadow >= C_Factor * C_Body and not C_HasUpShadow
+	if C_UpTrend
+	    C_HangingManBearish := true
+alertcondition(C_HangingManBearish, title = "上吊線", message = "New 上吊線 pattern detected")
+if C_HangingManBearish  and  HangingManInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishHangingMan = "上吊線\n當價格在開盤後顯著走低，但隨後反彈收盤於當日低點上方時，會形成上吊線K線。K線看起來像一個方塊連接著一個長條狀的圖形。如果這種K線出現在上升趨勢中，就被稱為上吊線。"
+    label.new(bar_index, patternLabelPosHigh, text="上吊", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishHangingMan)
+C_ShootingStarBearishNumberOfCandles = 1
+C_ShootingStarBearish = false
+if C_SmallBody and C_Body > 0 and C_BodyHi < hl2 and C_UpShadow >= C_Factor * C_Body and not C_HasDnShadow
+	if C_UpTrend
+	    C_ShootingStarBearish := true
+alertcondition(C_ShootingStarBearish, title = "流星線", message = "New 流星線 pattern detected")
+if C_ShootingStarBearish  and  ShootingStarInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishShootingStar = "流星線\n這個單日形態可能出現在上升趨勢中，開盤價較高，收盤價接近開盤價。它也有較高的交易價格。它本質上是看跌的，但看起來像倒錘子線。"
+    label.new(bar_index, patternLabelPosHigh, text="流星", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishShootingStar)
+C_InvertedHammerBullishNumberOfCandles = 1
+C_InvertedHammerBullish = false
+if C_SmallBody and C_Body > 0 and C_BodyHi < hl2 and C_UpShadow >= C_Factor * C_Body and not C_HasDnShadow
+    if C_DownTrend
+        C_InvertedHammerBullish := true
+alertcondition(C_InvertedHammerBullish, title = "倒錘子線", message = "New 倒錘子線 pattern detected")
+if C_InvertedHammerBullish  and  InvertedHammerInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishInvertedHammer = "倒錘子線\n在下跌趨勢中，開盤價較低。當價格最終走高，但收盤價接近開盤價時，它看起來像錘子線的倒置版本。這是一個單日看漲反轉形態。"
+    label.new(bar_index, patternLabelPosLow, text="倒錘", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishInvertedHammer)
+C_MorningStarBullishNumberOfCandles = 3
+C_MorningStarBullish = false
+if C_LongBody[2] and C_SmallBody[1] and C_LongBody
+    if C_DownTrend and C_BlackBody[2] and C_BodyHi[1] < C_BodyLo[2] and C_WhiteBody and C_BodyHi >= C_BodyMiddle[2] and C_BodyHi < C_BodyHi[2] and C_BodyHi[1] < C_BodyLo
+        C_MorningStarBullish := true
+alertcondition(C_MorningStarBullish, title = "早晨之星", message = "New 早晨之星 pattern detected")
+if C_MorningStarBullish  and  MorningStarInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishMorningStar = "早晨之星\n這是一個三天的看漲反轉形態，由三根K線組成：第一根是長實體陰線，延續當前的下跌趨勢。接著是一根短實體K線，開盤價向下跳空。最後是一根長實體陽線，開盤價向上跳空，收盤價高於第一天K線的中點。"
+    label.new(bar_index, patternLabelPosLow, text="晨星", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishMorningStar)
+C_EveningStarBearishNumberOfCandles = 3
+C_EveningStarBearish = false
+if C_LongBody[2] and C_SmallBody[1] and C_LongBody
+    if C_UpTrend and C_WhiteBody[2] and C_BodyLo[1] > C_BodyHi[2] and C_BlackBody and C_BodyLo <= C_BodyMiddle[2] and C_BodyLo > C_BodyLo[2] and C_BodyLo[1] > C_BodyHi
+        C_EveningStarBearish := true
+alertcondition(C_EveningStarBearish, title = "黃昏之星", message = "New 黃昏之星 pattern detected")
+if C_EveningStarBearish  and  EveningStarInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishEveningStar = "黃昏之星\n這個K線形態是看跌的，在上升趨勢中開始於一根長實體陽線。接著是一根跳空的小實體K線，最後以向下收盤結束。收盤價會低於第一天K線的中點。"
+    label.new(bar_index, patternLabelPosHigh, text="黃昏", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishEveningStar)
+C_MarubozuWhiteBullishNumberOfCandles = 1
+C_MarubozuShadowPercentWhite = 5.0
+C_MarubozuWhiteBullish = C_WhiteBody and C_LongBody and C_UpShadow <= C_MarubozuShadowPercentWhite/100*C_Body and C_DnShadow <= C_MarubozuShadowPercentWhite/100*C_Body and C_WhiteBody
+alertcondition(C_MarubozuWhiteBullish, title = "白色光頭光腳", message = "New 白色光頭光腳 pattern detected")
+if C_MarubozuWhiteBullish  and  MarubozuWhiteInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishMarubozuWhite = "白色光頭光腳\n白色光頭光腳K線是一種在開盤或收盤時沒有影線延伸的K線。Marubozu在日語中意為\"修剪\"或\"切斷\"。其他來源可能稱之為禿頭或剃頭K線。"
+    label.new(bar_index, patternLabelPosLow, text="白光", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishMarubozuWhite)
+C_MarubozuBlackBearishNumberOfCandles = 1
+C_MarubozuShadowPercentBearish = 5.0
+C_MarubozuBlackBearish = C_BlackBody and C_LongBody and C_UpShadow <= C_MarubozuShadowPercentBearish/100*C_Body and C_DnShadow <= C_MarubozuShadowPercentBearish/100*C_Body and C_BlackBody
+alertcondition(C_MarubozuBlackBearish, title = "黑色光頭光腳", message = "New 黑色光頭光腳 pattern detected")
+if C_MarubozuBlackBearish  and  MarubozuBlackInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishMarubozuBlack = "黑色光頭光腳\n這是一種在開盤、收盤或兩者都沒有影線延伸的陰線K線。在日語中，這個名字意為\"修剪\"或\"切斷\"。這種K線也可以被稱為禿頭或剃頭。"
+    label.new(bar_index, patternLabelPosHigh, text="黑光", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishMarubozuBlack)
+C_DojiNumberOfCandles = 1
+C_DragonflyDoji = C_IsDojiBody and C_UpShadow <= C_Body
+C_GravestoneDojiOne = C_IsDojiBody and C_DnShadow <= C_Body
+alertcondition(C_Doji and not C_DragonflyDoji and not C_GravestoneDojiOne, title = "十字星", message = "New 十字星 pattern detected")
+if C_Doji and not C_DragonflyDoji and not C_GravestoneDojiOne and DojiInput
+    var ttDoji = "十字星\n當證券的開盤價和收盤價基本相等時，會形成十字星K線。上下影線的長度可能不同，使K線看起來像十字、倒十字或加號。十字星K線顯示了買賣雙方在拉鋸戰中的猶豫不決。當價格在交易時段內高於或低於開盤價時，收盤價會接近或等於開盤價。"
+    label.new(bar_index, patternLabelPosLow, text="十字", style=label.style_label_up, color = label_color_neutral, textcolor=color.white, tooltip = ttDoji)
+C_GravestoneDojiBearishNumberOfCandles = 1
+C_GravestoneDojiBearish = C_IsDojiBody and C_DnShadow <= C_Body
+alertcondition(C_GravestoneDojiBearish, title = "墓碑十字", message = "New 墓碑十字 pattern detected")
+if C_GravestoneDojiBearish  and  GravestoneDojiInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishGravestoneDoji = "墓碑十字\n當十字星位於或接近當日低點時，會形成墓碑十字線。"
+    label.new(bar_index, patternLabelPosHigh, text="墓碑", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishGravestoneDoji)
+C_DragonflyDojiBullishNumberOfCandles = 1
+C_DragonflyDojiBullish = C_IsDojiBody and C_UpShadow <= C_Body
+alertcondition(C_DragonflyDojiBullish, title = "蜻蜓十字", message = "New 蜻蜓十字 pattern detected")
+if C_DragonflyDojiBullish  and  DragonflyDojiInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishDragonflyDoji = "蜻蜓十字\n與其他十字星類似，這種特定的十字星也經常出現在市場關鍵時刻。這是一種特殊的十字星，其開盤價和收盤價都位於當日高點。"
+    label.new(bar_index, patternLabelPosLow, text="蜻蜓", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishDragonflyDoji)
+C_HaramiCrossBullishNumberOfCandles = 2
+C_HaramiCrossBullish = C_LongBody[1] and C_BlackBody[1] and C_DownTrend[1] and C_IsDojiBody and high <= C_BodyHi[1] and low >= C_BodyLo[1]
+alertcondition(C_HaramiCrossBullish, title = "十字孕線", message = "New 十字孕線 pattern detected")
+if C_HaramiCrossBullish  and  HaramiCrossInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishHaramiCross = "十字孕線\n這個K線形態是看漲孕線形態的變體。它出現在下跌趨勢中。這個兩天K線形態由一根完全被前一根陰線實體包圍的十字星K線組成。"
+    label.new(bar_index, patternLabelPosLow, text="十字孕", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishHaramiCross)
+C_HaramiCrossBearishNumberOfCandles = 2
+C_HaramiCrossBearish = C_LongBody[1] and C_WhiteBody[1] and C_UpTrend[1] and C_IsDojiBody and high <= C_BodyHi[1] and low >= C_BodyLo[1]
+alertcondition(C_HaramiCrossBearish, title = "十字孕線", message = "New 十字孕線 pattern detected")
+if C_HaramiCrossBearish  and  HaramiCrossInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishHaramiCross = "十字孕線\n這個K線形態是看跌孕線形態的變體。它出現在上升趨勢中。這是一個兩天K線形態，由一根完全被前一根陽線實體包圍的十字星K線組成。十字星顯示賣方出現了一些猶豫，該形態暗示趨勢可能反轉。"
+    label.new(bar_index, patternLabelPosHigh, text="十字孕", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishHaramiCross)
+C_HaramiBullishNumberOfCandles = 2
+C_HaramiBullish = C_LongBody[1] and C_BlackBody[1] and C_DownTrend[1] and C_WhiteBody and C_SmallBody and high <= C_BodyHi[1] and low >= C_BodyLo[1]
+alertcondition(C_HaramiBullish, title = "孕線形態", message = "New 孕線形態 pattern detected")
+if C_HaramiBullish  and  HaramiInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishHarami = "孕線形態\n這個兩天K線形態由一根完全被前一根陰線實體包圍的小實體陽線組成。"
+    label.new(bar_index, patternLabelPosLow, text="孕線", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishHarami)
+C_HaramiBearishNumberOfCandles = 2
+C_HaramiBearish = C_LongBody[1] and C_WhiteBody[1] and C_UpTrend[1] and C_BlackBody and C_SmallBody and high <= C_BodyHi[1] and low >= C_BodyLo[1]
+alertcondition(C_HaramiBearish, title = "孕線形態", message = "New 孕線形態 pattern detected")
+if C_HaramiBearish  and  HaramiInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishHarami = "孕線形態\n這是一個兩天K線形態，由一根完全被前一根陽線實體包圍的小實體陰線組成。"
+    label.new(bar_index, patternLabelPosHigh, text="孕線", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishHarami)
+C_LongLowerShadowBullishNumberOfCandles = 1
+C_LongLowerShadowPercent = 75.0
+C_LongLowerShadowBullish = C_DnShadow > C_Range/100*C_LongLowerShadowPercent
+alertcondition(C_LongLowerShadowBullish, title = "長下影線", message = "New 長下影線 pattern detected")
+if C_LongLowerShadowBullish  and  LongLowerShadowInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishLongLowerShadow = "長下影線\n為了表示賣方在交易時段前半部分的主導地位，K線會呈現出長下影線和短上影線，從而導致價格下跌。"
+    label.new(bar_index, patternLabelPosLow, text="長下影", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishLongLowerShadow)
+C_LongUpperShadowBearishNumberOfCandles = 1
+C_LongShadowPercent = 75.0
+C_LongUpperShadowBearish = C_UpShadow > C_Range/100*C_LongShadowPercent
+alertcondition(C_LongUpperShadowBearish, title = "長上影線", message = "New 長上影線 pattern detected")
+if C_LongUpperShadowBearish  and  LongUpperShadowInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishLongUpperShadow = "長上影線\n為了表示買方在交易時段前半部分的主導地位，K線會呈現出長上影線和短下影線，從而導致價格上漲。"
+    label.new(bar_index, patternLabelPosHigh, text="長上影", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishLongUpperShadow)
+C_SpinningTopWhiteNumberOfCandles = 1
+C_SpinningTopWhitePercent = 34.0
+C_IsSpinningTopWhite = C_DnShadow >= C_Range / 100 * C_SpinningTopWhitePercent and C_UpShadow >= C_Range / 100 * C_SpinningTopWhitePercent and not C_IsDojiBody
+C_SpinningTopWhite = C_IsSpinningTopWhite and C_WhiteBody
+alertcondition(C_SpinningTopWhite, title = "白色陀螺", message = "New 白色陀螺 pattern detected")
+if C_SpinningTopWhite and SpinningTopWhiteInput
+    var ttSpinningTopWhite = "白色陀螺\n白色陀螺是實體較小、呈綠色、上下影線長度超過K線實體的K線。它們通常表示買賣雙方之間的猶豫不決。"
+    label.new(bar_index, patternLabelPosLow, text="白陀", style=label.style_label_up, color = label_color_neutral, textcolor=color.white, tooltip = ttSpinningTopWhite)
+C_SpinningTopBlackNumberOfCandles = 1
+C_SpinningTopBlackPercent = 34.0
+C_IsSpinningTop = C_DnShadow >= C_Range / 100 * C_SpinningTopBlackPercent and C_UpShadow >= C_Range / 100 * C_SpinningTopBlackPercent and not C_IsDojiBody
+C_SpinningTopBlack = C_IsSpinningTop and C_BlackBody
+alertcondition(C_SpinningTopBlack, title = "黑色陀螺", message = "New 黑色陀螺 pattern detected")
+if C_SpinningTopBlack and SpinningTopBlackInput
+    var ttSpinningTopBlack = "黑色陀螺\n黑色陀螺是實體較小、呈紅色、上下影線長度超過K線實體的K線。它們通常表示猶豫不決。"
+    label.new(bar_index, patternLabelPosLow, text="黑陀", style=label.style_label_up, color = label_color_neutral, textcolor=color.white, tooltip = ttSpinningTopBlack)
+C_ThreeWhiteSoldiersBullishNumberOfCandles = 3
+C_3WSld_ShadowPercent = 5.0
+C_3WSld_HaveNotUpShadow = C_Range * C_3WSld_ShadowPercent / 100 > C_UpShadow
+C_ThreeWhiteSoldiersBullish = false
+if C_LongBody and C_LongBody[1] and C_LongBody[2]
+    if C_WhiteBody and C_WhiteBody[1] and C_WhiteBody[2]
+        C_ThreeWhiteSoldiersBullish := close > close[1] and close[1] > close[2] and open < close[1] and open > open[1] and open[1] < close[2] and open[1] > open[2] and C_3WSld_HaveNotUpShadow and C_3WSld_HaveNotUpShadow[1] and C_3WSld_HaveNotUpShadow[2]
+alertcondition(C_ThreeWhiteSoldiersBullish, title = "三白兵", message = "New 三白兵 pattern detected")
+if C_ThreeWhiteSoldiersBullish  and  ThreeWhiteSoldiersInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishThreeWhiteSoldiers = "三白兵\n這個看漲反轉形態由三根連續的長實體陽線組成。每根K線的開盤價都在前一根K線的實體範圍內，收盤價接近當日高點。"
+    label.new(bar_index, patternLabelPosLow, text="三白", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishThreeWhiteSoldiers)
+C_ThreeBlackCrowsBearishNumberOfCandles = 3
+C_3BCrw_ShadowPercent = 5.0
+C_3BCrw_HaveNotDnShadow = C_Range * C_3BCrw_ShadowPercent / 100 > C_DnShadow
+C_ThreeBlackCrowsBearish = false
+if C_LongBody and C_LongBody[1] and C_LongBody[2]
+    if C_BlackBody and C_BlackBody[1] and C_BlackBody[2]
+        C_ThreeBlackCrowsBearish := close < close[1] and close[1] < close[2] and open > close[1] and open < open[1] and open[1] > close[2] and open[1] < open[2] and C_3BCrw_HaveNotDnShadow and C_3BCrw_HaveNotDnShadow[1] and C_3BCrw_HaveNotDnShadow[2]
+alertcondition(C_ThreeBlackCrowsBearish, title = "三隻烏鴉", message = "New 三隻烏鴉 pattern detected")
+if C_ThreeBlackCrowsBearish  and  ThreeBlackCrowsInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishThreeBlackCrows = "三隻烏鴉\n這是一個看跌反轉形態，由三根連續的長實體陰線組成。每根K線的開盤價都在前一根K線的實體範圍內，收盤價接近或等於當日低點。"
+    label.new(bar_index, patternLabelPosHigh, text="三烏", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishThreeBlackCrows)
+C_EngulfingBullishNumberOfCandles = 2
+C_EngulfingBullish = C_DownTrend and C_WhiteBody and C_LongBody and C_BlackBody[1] and C_SmallBody[1] and close >= open[1] and open <= close[1] and ( close > open[1] or open < close[1] )
+alertcondition(C_EngulfingBullish, title = "吞沒形態", message = "New 吞沒形態 pattern detected")
+if C_EngulfingBullish  and  EngulfingInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishEngulfing = "吞沒形態\n在下跌趨勢結束時，很可能會出現反轉形態。第一天的K線形態使用小實體，接著是一天K線的實體完全覆蓋前一天的實體，並在趨勢相反方向收盤。雖然與外部反轉圖表形態相似，但這種形態不需要完全覆蓋價格範圍（從高點到低點），只需要覆蓋開盤價和收盤價。"
+    label.new(bar_index, patternLabelPosLow, text="吞沒", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishEngulfing)
+C_EngulfingBearishNumberOfCandles = 2
+C_EngulfingBearish = C_UpTrend and C_BlackBody and C_LongBody and C_WhiteBody[1] and C_SmallBody[1] and close <= open[1] and open >= close[1] and ( close < open[1] or open > close[1] )
+alertcondition(C_EngulfingBearish, title = "吞沒形態", message = "New 吞沒形態 pattern detected")
+if C_EngulfingBearish  and  EngulfingInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishEngulfing = "吞沒形態\n在上升趨勢結束時，很可能會出現反轉形態。第一天的K線形態使用小實體。接著是一天K線的實體完全覆蓋前一天的實體，並在趨勢相反方向收盤。雖然與外部反轉圖表形態相似，但這種形態不需要完全覆蓋價格範圍（從高點到低點），只需要覆蓋開盤價和收盤價。"
+    label.new(bar_index, patternLabelPosHigh, text="吞沒", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishEngulfing)
+C_AbandonedBabyBullishNumberOfCandles = 3
+C_AbandonedBabyBullish = C_DownTrend[2] and C_BlackBody[2] and C_IsDojiBody[1] and low[2] > high[1] and C_WhiteBody and high[1] < low
+alertcondition(C_AbandonedBabyBullish, title = "棄嬰形態", message = "New 棄嬰形態 pattern detected")
+if C_AbandonedBabyBullish  and  AbandonedBabyInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishAbandonedBaby = "棄嬰形態\n這個K線形態在反轉形態中相當罕見。形態的第一根是大幅下跌的K線。接著是一根在前一根K線下方形成缺口的十字星K線。十字星K線之後是另一根開盤價更高的K線，並迅速向上移動。"
+    label.new(bar_index, patternLabelPosLow, text="棄嬰", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishAbandonedBaby)
+C_AbandonedBabyBearishNumberOfCandles = 3
+C_AbandonedBabyBearish = C_UpTrend[2] and C_WhiteBody[2] and C_IsDojiBody[1] and high[2] < low[1] and C_BlackBody and low[1] > high
+alertcondition(C_AbandonedBabyBearish, title = "棄嬰形態", message = "New 棄嬰形態 pattern detected")
+if C_AbandonedBabyBearish  and  AbandonedBabyInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishAbandonedBaby = "棄嬰形態\n看跌棄嬰形態是一個特定的K線形態，通常表示證券價格的向下反轉趨勢。它形成於十字星K線的最低價與前一天K線之間出現缺口時。前一根K線是綠色、較長且具有小影線。十字星K線之後也有一個缺口，位於其最低價點與下一根K線的最高價點之間，下一根K線是紅色、較長且也具有小影線。十字星K線的影線必須完全與第一天和第三天的影線形成缺口，才能形成棄嬰形態效果。"
+    label.new(bar_index, patternLabelPosHigh, text="棄嬰", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishAbandonedBaby)
+C_TriStarBullishNumberOfCandles = 3
+C_3DojisBullish = C_Doji[2] and C_Doji[1] and C_Doji
+C_BodyGapUpBullish = C_BodyHi[1] < C_BodyLo
+C_BodyGapDnBullish = C_BodyLo[1] > C_BodyHi
+C_TriStarBullish = C_3DojisBullish and C_DownTrend[2] and C_BodyGapDnBullish[1] and C_BodyGapUpBullish
+alertcondition(C_TriStarBullish, title = "三星形態", message = "New 三星形態 pattern detected")
+if C_TriStarBullish  and  TriStarInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishTriStar = "三星形態\n當三根十字星K線在延續的下跌趨勢末端連續出現時，可能形成看漲三星形態。第一根十字星K線標誌著多空雙方的猶豫不決。第二根十字星在主要趨勢方向上形成缺口。第三根改變了市場態度，一旦K線在與趨勢相反的方向開盤。每根十字星K線都有影線，都相對較短，表示波動性暫時減弱。"
+    label.new(bar_index, patternLabelPosLow, text="三星", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishTriStar)
+C_TriStarBearishNumberOfCandles = 3
+C_3Dojis = C_Doji[2] and C_Doji[1] and C_Doji
+C_BodyGapUp = C_BodyHi[1] < C_BodyLo
+C_BodyGapDn = C_BodyLo[1] > C_BodyHi
+C_TriStarBearish = C_3Dojis and C_UpTrend[2] and C_BodyGapUp[1] and C_BodyGapDn
+alertcondition(C_TriStarBearish, title = "三星形態", message = "New 三星形態 pattern detected")
+if C_TriStarBearish  and  TriStarInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishTriStar = "三星形態\n當三根十字星K線在延續的上升趨勢末端連續出現時，可能形成這個特定形態。第一根十字星K線標誌著多空雙方的猶豫不決。第二根十字星在主要趨勢方向上形成缺口。第三根改變了市場態度，一旦K線在與趨勢相反的方向開盤。每根十字星K線都有影線，都相對較短，表示波動性暫時減弱。"
+    label.new(bar_index, patternLabelPosHigh, text="三星", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishTriStar)
+C_KickingBullishNumberOfCandles = 2
+C_MarubozuShadowPercent = 5.0
+C_Marubozu = C_LongBody and C_UpShadow <= C_MarubozuShadowPercent/100*C_Body and C_DnShadow <= C_MarubozuShadowPercent/100*C_Body
+C_MarubozuWhiteBullishKicking = C_Marubozu and C_WhiteBody
+C_MarubozuBlackBullish = C_Marubozu and C_BlackBody
+C_KickingBullish = C_MarubozuBlackBullish[1] and C_MarubozuWhiteBullishKicking and high[1] < low
+alertcondition(C_KickingBullish, title = "反轉形態", message = "New 反轉形態 pattern detected")
+if C_KickingBullish  and  KickingInput and (("Bullish" == CandleType) or CandleType == "Both")
+
+    var ttBullishKicking = "反轉形態\n第一天的K線是看跌光頭光腳K線，幾乎沒有上下影線，價格在當日高點開盤，在當日低點收盤。第二天是看漲光頭光腳形態，幾乎沒有上下影線，價格在當日低點開盤，在當日高點收盤。此外，第二天大幅向上跳空，開盤價高於前一天。這個缺口或窗口（日本人稱之為窗口）位於第一天和第二天看漲K線之間。"
+    label.new(bar_index, patternLabelPosLow, text="反轉", style=label.style_label_up, color = label_color_bullish, textcolor=color.white, tooltip = ttBullishKicking)
+C_KickingBearishNumberOfCandles = 2
+C_MarubozuBullishShadowPercent = 5.0
+C_MarubozuBearishKicking = C_LongBody and C_UpShadow <= C_MarubozuBullishShadowPercent/100*C_Body and C_DnShadow <= C_MarubozuBullishShadowPercent/100*C_Body
+C_MarubozuWhiteBearish = C_MarubozuBearishKicking and C_WhiteBody
+C_MarubozuBlackBearishKicking = C_MarubozuBearishKicking and C_BlackBody
+C_KickingBearish = C_MarubozuWhiteBearish[1] and C_MarubozuBlackBearishKicking and low[1] > high
+alertcondition(C_KickingBearish, title = "反轉形態", message = "New 反轉形態 pattern detected")
+if C_KickingBearish  and  KickingInput and (("Bearish" == CandleType) or CandleType == "Both")
+
+    var ttBearishKicking = "反轉形態\n看跌反轉形態將出現，隨後預示著新的下跌趨勢的反轉。第一天的K線是看漲光頭光腳。第二天大幅向下跳空，開盤價低於前一天。第一天和第二天看跌K線之間存在缺口。"
+    label.new(bar_index, patternLabelPosHigh, text="反轉", style=label.style_label_down, color = label_color_bearish, textcolor=color.white, tooltip = ttBearishKicking)
+    var ttAllCandlestickPatterns = "所有K線形態\n"
+    label.new(bar_index, patternLabelPosLow, text="集合", style=label.style_label_up, color = label_color_neutral, textcolor=color.white, tooltip = ttAllCandlestickPatterns)
