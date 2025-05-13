@@ -1,9 +1,9 @@
 # CandlePatternsZh
 
-A project dedicated to localizing Candlestick Patterns into Chinese, providing educational resources and TradingView PineScript tools for traders.
+**CandlePatternsZh** aims to translate All Patterns indicators in TradingView into Chinese, combining educational content with TradingView's PineScript code tool to help traders better understand and apply technical analysis.
 
 ## 專案介紹 (Project Overview)
-**CandlePatternsZh** 旨在將K線形態翻譯成中文，結合教育內容和TradingView的PineScript程式碼工具，幫助交易者更好地理解和應用技術分析。
+**CandlePatternsZh** 旨在將TradingView裡的All Patterns指標翻譯成中文，結合教育內容和TradingView的PineScript程式碼工具，幫助交易者更好地理解和應用技術分析。
 
 - **中文化**：提供K線形態的中文名稱、解釋和交易策略。
 - **PineScript工具**：自動檢測並視覺化K線形態，支援TradingView平台。
